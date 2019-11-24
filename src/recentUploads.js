@@ -48,11 +48,11 @@ class RecentUploads extends React.Component {
         console.log('Start')
         const items = await prods.data.listProducts.items.reduce(async (promisedItems, product) => {
             const items = await promisedItems
-            product.mainImage = await this.getProductImage(product.mainImage);
+            product.mainImageUrl = await this.getProductImage(product.mainImage);
             return items.concat(product)
         }, [])
         console.log('End')
-        console.log('I am items', items);
+        // console.log('I am items', items);
 
         this.setState({ items: prods.data.listProducts.items })
         console.log('Query for data complete');
@@ -73,17 +73,17 @@ class RecentUploads extends React.Component {
     }
 
     renderUpload(product, i) {
-        const { price, name, mainImage } = product;
+        const { price, name, mainImageUrl } = product;
         const { navigate } = this.props.navigation;
 
         return (
             <TouchableOpacity
                 style={styles.carouselItem}
-                onPress={() => navigate('Product')}
+                onPress={() => navigate('Product', { product })}
             >
                 <Image
                     style={styles.carouselItemImage}
-                    source={{ uri: mainImage }}
+                    source={{ uri: mainImageUrl }}
                 />
                 <Text style={styles.carouseTitle}>{name}</Text>
                 <Text style={styles.carouselSubTitle}>£{Number(price).toFixed(2)}</Text>
