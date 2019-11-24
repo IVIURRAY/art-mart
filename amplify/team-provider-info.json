@@ -1,0 +1,14 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "art-mart-dev-20191124100451-authRole",
+            "UnauthRoleArn": "arn:aws:iam::507147213615:role/art-mart-dev-20191124100451-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::507147213615:role/art-mart-dev-20191124100451-authRole",
+            "Region": "eu-west-1",
+            "DeploymentBucketName": "art-mart-dev-20191124100451-deployment",
+            "UnauthRoleName": "art-mart-dev-20191124100451-unauthRole",
+            "StackName": "art-mart-dev-20191124100451",
+            "StackId": "arn:aws:cloudformation:eu-west-1:507147213615:stack/art-mart-dev-20191124100451/db6e1690-0ea1-11ea-90af-069d5f57c92e"
+        }
+    }
+}

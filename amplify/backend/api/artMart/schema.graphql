@@ -1,0 +1,14 @@
+type User @model {
+  id: ID!
+  username: String!
+  avatar: String
+}
+
+type Product @model {
+  id: ID!
+  name: String!
+  description: String
+  price: Float
+  mainImage: String
+  images: [String]
+}
