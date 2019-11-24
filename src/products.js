@@ -4,6 +4,8 @@ import Constants from 'expo-constants';
 import { Icon } from 'react-native-elements'
 import AppHeader from './appHeader';
 import { withNavigation } from 'react-navigation';
+import { listProducts } from './graphql/queries';
+import { Storage, API, graphqlOperation } from 'aws-amplify';
 
 const DATA = [
   {
@@ -49,41 +51,80 @@ class Products extends React.Component {
     super(props);
     this.state = {
       singleItemView: false,
+      items: []
     }
   }
 
-  renderProduct(item) {
-    const { title, price, image } = item;
+  async componentDidMount() {
+    await this.getAllProducts()
+  }
+
+  getAllProducts = async () => {
+    console.log('Starting query for data');
+    const prods = await API.graphql(graphqlOperation(listProducts));
+    // console.log(prods.data.listProducts.items);
+
+    console.log('Start')
+    const items = await prods.data.listProducts.items.reduce(async (promisedItems, product) => {
+      const items = await promisedItems
+      product.mainImageUrl = await this.getProductImage(product.mainImage);
+      return items.concat(product)
+    }, [])
+    console.log('End')
+    // console.log('I am items', items);
+
+    this.setState({ items: prods.data.listProducts.items })
+    console.log('Query for data complete');
+  }
+
+  getProductImage = async (productName) => {
+    console.log('starting image get')
+    const path = 'products/' + productName;
+    const imageUrl = await Storage.get(path)
+      .then(result => {
+        console.log('successfully got image: ', path);
+        return result;
+      })
+      .catch(err => console.log('ERROR:::' + err));
+    console.log('finished image get')
+
+    return imageUrl;
+  }
+
+  renderProduct(product) {
+    const { name, price, mainImageUrl } = product;
     const { navigate } = this.props.navigation;
 
     return (
       <TouchableOpacity
         style={styles.item}
-        onPress={() => navigate('Product')}
+        onPress={() => navigate('Product', { product })}
       >
         <View style={styles.productImageContainer}>
           <Image
             style={styles.productImage}
-            source={image}
+            source={{ uri: mainImageUrl }}
           />
         </View>
 
         <View style={styles.itemFooter}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.price}>£{Number(price).toFixed(2)}</Text>
+          <Text style={styles.title}>{name}</Text>
+          <Text style={styles.price}>£{price}</Text>
         </View>
       </TouchableOpacity>
     );
   }
 
   render() {
+    const { items } = this.state;
+
     return (
       <View style={styles.container}>
         <AppHeader />
         <View style={{ flex: .5, flexDirection: 'row', paddingBottom: 20 }}>
           <View style={{ flex: 7 }}>
             <Text style={styles.pageTitle}>All products</Text>
-            <Text style={styles.itemCount}>Item count: {DATA.length}</Text>
+            <Text style={styles.itemCount}>Item count: {items.length}</Text>
           </View>
           <View style={{ flex: 1, marginHorizontal: 20 }}>
             <Icon
@@ -97,7 +138,7 @@ class Products extends React.Component {
         </View>
         <View style={{ flex: 9.5 }}>
           <FlatList
-            data={DATA}
+            data={items}
             renderItem={({ item }) => this.renderProduct(item)}
             key={this.state.singleItemView ? 'single' : 'multi'}
             keyExtractor={item => item.id}

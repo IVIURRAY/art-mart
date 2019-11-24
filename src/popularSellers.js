@@ -2,9 +2,8 @@ import React from 'react';
 import { Card, ListItem } from 'react-native-elements'
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
-import API, { graphqlOperation } from '@aws-amplify/api';
 import { listUsers } from './graphql/queries';
-import { Storage } from 'aws-amplify';
+import { Storage, API, graphqlOperation } from 'aws-amplify';
 
 USERS = [
     {

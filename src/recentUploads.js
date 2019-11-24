@@ -1,9 +1,8 @@
 import React from 'react';
 import { StyleSheet, View, Text, FlatList, Dimensions, Image, TouchableOpacity } from 'react-native';
 import { withNavigation } from 'react-navigation';
-import API, { graphqlOperation } from '@aws-amplify/api';
 import { listProducts } from './graphql/queries';
-import Storage from '@aws-amplify/storage';
+import { Storage, API, graphqlOperation } from 'aws-amplify';
 
 UPLOADS = [
     {
