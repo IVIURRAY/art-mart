@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import API, { graphqlOperation } from '@aws-amplify/api';
 import { listUsers } from './graphql/queries';
+import { Storage } from 'aws-amplify';
 
 USERS = [
     {
@@ -24,34 +25,58 @@ export default class PopularSellers extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            users: [],
-            defaultPic: '../assets/avatar1.png'
+            users: []
         }
     }
 
     componentDidMount() {
-        this.getRecentProducts()
+        this.getPopularUsers()
     }
 
-    getRecentProducts = async () => {
+    getPopularUsers = async () => {
         console.log('Starting query for users');
         const users = await API.graphql(graphqlOperation(listUsers));
-        this.setState({ users: users.data.listUsers.items })
+
+        console.log(users);
+        console.log('Start')
+        const items = await users.data.listUsers.items.reduce(async (promisedItems, user) => {
+            const items = await promisedItems
+            user.avatar = await this.getUserImage(user.avatar);
+            return items.concat(user)
+        }, [])
+        // console.log(items);
+        console.log('End')
+
         console.log('Query for users complete');
+
+        this.setState({ users: items })
+    }
+
+    getUserImage = async (userAvatar) => {
+        console.log('starting image get')
+        const path = 'users/' + userAvatar;
+        const imageUrl = await Storage.get(path)
+            .then(result => {
+                console.log('successfully got image: ', path);
+                return result;
+            })
+            .catch(err => console.log('ERROR:::' + err));
+        console.log('finished image get')
+
+        return imageUrl;
     }
 
     renderSeller(user, i) {
-        const { avatar } = user;
-        // console.log('../assets/' + avatar);
+        const { avatar, username } = user;
 
         return (
             <ListItem
                 key={i}
-                title={user.name}
+                title={username}
                 titleStyle={{ color: 'black', fontWeight: 'bold' }}
                 subtitleStyle={{ color: 'black' }}
                 subtitle="Visit Store"
-                leftAvatar={{ rounded: true, size: 'large', source: { uri: 'https://art-mart-storage-dev.s3-eu-west-1.amazonaws.com/images/users/avatar1.png' }, avatarStyle: styles.sellerCardImage }}
+                leftAvatar={{ rounded: true, size: 'large', source: { uri: avatar }, avatarStyle: styles.sellerCardImage }}
                 rightIcon={< Icon name='hearto' size={18} />}
                 chevron={{ color: 'black' }}
                 containerStyle={styles.sellerCard}
@@ -62,8 +87,6 @@ export default class PopularSellers extends React.Component {
 
     render() {
         const { users } = this.state;
-        // console.log('this is renders')
-        // console.log(users);
         return (
             <View>
                 <Text style={styles.title} >Popular sellers...</Text>
