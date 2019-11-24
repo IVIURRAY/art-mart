@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, FlatList, Dimensions, Image, TouchableOpacity }
 import { withNavigation } from 'react-navigation';
 import API, { graphqlOperation } from '@aws-amplify/api';
 import { listProducts } from './graphql/queries';
-import Amplify, { Storage } from "aws-amplify";
+import Storage from '@aws-amplify/storage';
 
 UPLOADS = [
     {
@@ -37,29 +37,43 @@ class RecentUploads extends React.Component {
     }
 
     async componentDidMount() {
-        this.getRecentProducts()
-        this.getFileTest()
+        await this.getRecentProducts()
     }
 
     getRecentProducts = async () => {
         console.log('Starting query for data');
         const prods = await API.graphql(graphqlOperation(listProducts));
+        // console.log(prods.data.listProducts.items);
+
+        console.log('Start')
+        const items = await prods.data.listProducts.items.reduce(async (promisedItems, product) => {
+            const items = await promisedItems
+            product.mainImage = await this.getProductImage(product.mainImage);
+            return items + product
+        }, [])
+        console.log('End')
+        console.log('I am items', items);
+
         this.setState({ items: prods.data.listProducts.items })
         console.log('Query for data complete');
     }
 
-    getFileTest = async () => {
+    getProductImage = async (productName) => {
         console.log('starting image get')
-        const path = 'images/users/';
-        // await Amplify.Auth.currentAuthenticatedUser().then(response => console.log(response))
-        Storage.get('assets/products/airpod1.png')
-            .then(result => console.log('RESULT:::' + result))
+        const path = 'products/' + productName;
+        const imageUrl = await Storage.get(path)
+            .then(result => {
+                console.log('successfully got image: ', path);
+                return result;
+            })
             .catch(err => console.log('ERROR:::' + err));
         console.log('finished image get')
+
+        return imageUrl;
     }
 
     renderUpload(product, i) {
-        const { price, name } = product;
+        const { price, name, mainImage } = product;
         const { navigate } = this.props.navigation;
 
         return (
@@ -69,7 +83,7 @@ class RecentUploads extends React.Component {
             >
                 <Image
                     style={styles.carouselItemImage}
-                    source={{ uri: 'https://art-mart-storage-dev.s3-eu-west-1.amazonaws.com/images/products/airpod1.png' }}
+                    source={{ uri: mainImage }}
                 />
                 <Text style={styles.carouseTitle}>{name}</Text>
                 <Text style={styles.carouselSubTitle}>£{Number(price).toFixed(2)}</Text>

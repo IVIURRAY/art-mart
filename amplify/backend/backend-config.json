@@ -16,5 +16,18 @@
 				}
 			}
 		}
+	},
+	"auth": {
+		"artmart3201b381": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": []
+		}
+	},
+	"storage": {
+		"artMartStorage": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation"
+		}
 	}
 }
