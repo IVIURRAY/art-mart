@@ -45,7 +45,7 @@ class Basket extends React.Component {
         return (
             <TouchableOpacity
                 style={styles.productContainer}
-                onPress={() => navigate('Product')}
+                onPress={() => navigate('Product', { product })}
             >
                 <View style={{ flex: 1 }}>
                     <Image source={product.image} style={styles.productImage} />
