@@ -49,7 +49,7 @@ class RecentUploads extends React.Component {
         const items = await prods.data.listProducts.items.reduce(async (promisedItems, product) => {
             const items = await promisedItems
             product.mainImage = await this.getProductImage(product.mainImage);
-            return items + product
+            return items.concat(product)
         }, [])
         console.log('End')
         console.log('I am items', items);
