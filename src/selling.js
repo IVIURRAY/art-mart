@@ -2,54 +2,47 @@ import React, { useEffect, useReducer } from 'react'
 import { View, StyleSheet } from 'react-native';
 import { Text, Button } from 'react-native-elements';
 import { withNavigation } from 'react-navigation';
+import * as ImagePicker from 'expo-image-picker';
+import Constants from 'expo-constants';
+import * as Permissions from 'expo-permissions';
 import API, { graphqlOperation } from '@aws-amplify/api'
-import { listTodos } from './graphql/queries';
-import { onCreateTodo } from './graphql/subscriptions';
-import { createTodo } from './graphql/mutations';
 
-
-const initialState = { todos: [] };
-const reducer = (state, action) => {
-    switch (action.type) {
-        case 'QUERY':
-            return { ...state, todos: action.todos }
-        case 'SUBSCRIPTION':
-            return { ...state, todos: [...state.todos, action.todo] }
-        default:
-            return state
+class Selling extends React.Component {
+    componentDidMount() {
+        this.getPermissionAsync();
+        console.log('hi');
     }
-}
 
-function Selling() {
-    const [state, dispatch] = useReducer(reducer, initialState)
-
-    useEffect(() => {
-        getData()
-
-        const subscription = API.graphql(graphqlOperation(onCreateTodo)).subscribe({
-            next: (eventData) => {
-                const todo = eventData.value.data.onCreateTodo;
-                dispatch({ type: 'SUBSCRIPTION', todo })
+    getPermissionAsync = async () => {
+        if (Constants.platform.ios) {
+            const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+            if (status !== 'granted') {
+                alert('Sorry, we need camera roll permissions to make this work!');
             }
-        })
-        return () => subscription.unsubscribe()
-    }, [])
-
-    async function createNewTodo() {
-        const todo = { name: "Use AppSync", description: "Realtime and Offline" }
-        await API.graphql(graphqlOperation(createTodo, { input: todo }))
+        }
     }
-    async function getData() {
-        const todoData = await API.graphql(graphqlOperation(listTodos))
-        dispatch({ type: 'QUERY', todos: todoData.data.listTodos.items });
+    _pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1
+        });
+
+        console.log(result);
     }
 
-    return (
-        <View style={styles.container}>
-            <Button onPress={createNewTodo} title='Create Todo' />
-            {state.todos.map((todo, i) => <Text key={todo.id}>{todo.name} : {todo.description}</Text>)}
-        </View>
-    );
+    render() {
+        return (
+            <View style={styles.container}>
+                <Button
+                    title="Pick an image from camera roll"
+                    onPress={this._pickImage}
+                />
+            </View>
+        )
+    }
+
 }
 
 const styles = StyleSheet.create({
