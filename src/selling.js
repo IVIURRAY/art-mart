@@ -1,21 +1,24 @@
 import React from 'react'
+import API, { graphqlOperation } from '@aws-amplify/api';
 import { View, StyleSheet, TextInput, Image, KeyboardAvoidingView, Alert } from 'react-native';
-import { Text, Button } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { withNavigation } from 'react-navigation';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import AppHeader from './appHeader';
+import { createProduct } from './graphql/mutations'
 
 class Selling extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {
+        this.initialState = {
             image: '',
             title: '',
             description: '',
             price: 0
         }
+        this.state = this.initialState
     }
 
     componentDidMount() {
@@ -41,11 +44,11 @@ class Selling extends React.Component {
         if (!result.cancelled) {
             this.setState({ image: result.uri });
         }
-        console.log('This is uri: ', result);
     }
 
     _uploadProduct = async () => {
         const { image, price, title, description } = this.state;
+        const { navigate } = this.props.navigation;
 
         if (!image) {
             Alert.alert('Please uplodate an image.');
@@ -62,11 +65,33 @@ class Selling extends React.Component {
         } else {
             console.log('Passed validation, will upload product:', this.state)
         }
+
+        result = await API.graphql(
+            graphqlOperation(
+                createProduct,
+                {
+                    input: {
+                        name: title,
+                        description: description,
+                        price: parseFloat(price),
+                        mainImage: image
+                    }
+                }
+            ))
+            .then(res => {
+                console.log('SUCCESS::', res)
+                Alert.alert(`Successfully uploaded ${title}.`)
+                this.setState(this.initialState)
+                navigate('Home');
+            })
+            .catch(err => {
+                console.log('ERROR::', err)
+                Alert.alert('Issue with uploading product. Please try again.')
+            })
+        console.log(result);
     }
 
     render() {
-        console.log(this.state);
-
         if (this.state.image) {
             button = <Image style={styles.image} source={{ uri: this.state.image }} />;
         } else {
