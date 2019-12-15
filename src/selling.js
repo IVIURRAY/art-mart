@@ -1,5 +1,6 @@
 import React from 'react'
 import API, { graphqlOperation } from '@aws-amplify/api';
+import { Storage, Auth } from 'aws-amplify';
 import { View, StyleSheet, TextInput, Image, KeyboardAvoidingView, Alert } from 'react-native';
 import { Button } from 'react-native-elements';
 import { withNavigation } from 'react-navigation';
@@ -8,12 +9,13 @@ import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import AppHeader from './appHeader';
 import { createProduct } from './graphql/mutations'
+const uuidv4 = require('uuid/v4');
 
 class Selling extends React.Component {
     constructor(props) {
         super(props)
         this.initialState = {
-            image: '',
+            imageUri: '',
             title: '',
             description: '',
             price: 0
@@ -42,15 +44,17 @@ class Selling extends React.Component {
         });
 
         if (!result.cancelled) {
-            this.setState({ image: result.uri });
+            this.setState({
+                imageUri: result.uri
+            });
         }
     }
 
     _uploadProduct = async () => {
-        const { image, price, title, description } = this.state;
+        const { imageUri, price, title, description } = this.state;
         const { navigate } = this.props.navigation;
 
-        if (!image) {
+        if (!imageUri) {
             Alert.alert('Please uplodate an image.');
             return
         } else if (!price) {
@@ -63,9 +67,55 @@ class Selling extends React.Component {
             Alert.alert('Please give a description.');
             return
         } else {
-            console.log('Passed validation, will upload product:', this.state)
+            console.log('Passed validation, will upload product:', title)
         }
 
+        // Any user made through the AWS console needs a password reset...
+        // const user = await Auth.signIn(
+        //     'admin@test.com',
+        //     'admin123'
+        // ).then(res => {
+        //     Auth.completeNewPassword(res, 'admin1234') // give the user a new password
+        //         .then(res => console.log('USER PASSWORD::', res))
+        //         .catch(err => console.log('USER PASSWORD::', err))
+        //     console.log('USER SUCCESS::', res)
+        // })
+        //     .catch(err => console.log('USER ERROR::', err));
+
+        // User needs to be authenticated to upload to S3
+        // TODO - This needs to be the actual user...probably send them to the login page
+        await Auth.signIn(
+            'admin@test.com',
+            'admin1234'
+        ).then(res => console.log('sign in'))
+            .catch(err => console.log('not sign in'))
+
+        console.log('Authenticated user:', await Auth.currentAuthenticatedUser());
+
+        // Upload the image to S3...give the file name to Dynamo
+        const fileTypeSplit = imageUri.split('.');
+        const fileType = fileTypeSplit[fileTypeSplit.length - 1];
+        const s3FileName = `${uuidv4()}.${fileType}`;
+        fetch(imageUri)
+            .then(response => {
+                response.blob()
+                    .then(blob => {
+                        Storage.put(
+                            'products/' + s3FileName,
+                            blob,
+                            {
+                                level: 'public',
+                                contentType: fileType
+                            }
+                        )
+                            .then(res => console.log('S3 File upload successful::', res))
+                            .catch(err => console.log('S3 File upload failed::', err));
+                    })
+            })
+            .catch(err => console.log('Unable to fetch image', err))
+
+
+        // Using the new S3 file path...give that to dynamo to save.
         result = await API.graphql(
             graphqlOperation(
                 createProduct,
@@ -74,26 +124,26 @@ class Selling extends React.Component {
                         name: title,
                         description: description,
                         price: parseFloat(price),
-                        mainImage: image
+                        mainImage: s3FileName
                     }
                 }
             ))
             .then(res => {
-                console.log('SUCCESS::', res)
+                console.log('Dynamo SUCCESS::', res)
                 Alert.alert(`Successfully uploaded ${title}.`)
                 this.setState(this.initialState)
                 navigate('Home');
             })
             .catch(err => {
-                console.log('ERROR::', err)
+                console.log('Dynamo ERROR::', err)
                 Alert.alert('Issue with uploading product. Please try again.')
             })
         console.log(result);
     }
 
     render() {
-        if (this.state.image) {
-            button = <Image style={styles.image} source={{ uri: this.state.image }} />;
+        if (this.state.imageUri) {
+            button = <Image style={styles.image} source={{ uri: this.state.imageUri }} />;
         } else {
             button = <Button title="Chose image" onPress={this._pickImage} />;
         }
