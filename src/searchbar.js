@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SearchBar } from 'react-native-elements';
-import { withNavigation } from 'react-navigation';
 
 class Searchbar extends React.Component {
     constructor(props) {
@@ -13,14 +12,13 @@ class Searchbar extends React.Component {
 
     render() {
         const { search } = this.state;
-        const { navigate } = this.props.navigation;
 
         return (
             <SearchBar
                 placeholder="Search for a product..."
                 onChangeText={searchValue => this.setState({ search: searchValue })}
                 value={search}
-                onSubmitEditing={() => navigate('Products')}
+                onSubmitEditing={() => console.log('Products')}
                 inputContainerStyle={styles.searchbarInput}
                 containerStyle={styles.searchbarContainer}
             />
@@ -45,6 +43,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 3,
         elevation: 4,
+        marginTop: 10
     },
     searchbarInput: {
         backgroundColor: 'white',
@@ -52,4 +51,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default withNavigation(Searchbar);
+export default Searchbar;

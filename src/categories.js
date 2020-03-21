@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab-view';
-import { withNavigation } from 'react-navigation';
 
 const CATEGORIES = [
     {
@@ -55,8 +54,7 @@ const CATEGORIES = [
 class Categories extends React.Component {
 
     changeTab() {
-        const { navigate } = this.props.navigation;
-        navigate('Products');
+        console.log('Products');
     }
 
 
@@ -97,4 +95,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default withNavigation(Categories);
+export default Categories;

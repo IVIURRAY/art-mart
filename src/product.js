@@ -1,21 +1,17 @@
 import React from 'react';
 import { Text, View, StyleSheet, Image } from 'react-native';
 import { Icon, Button } from 'react-native-elements';
-import AppHeader from './appHeader';
 import Swiper from 'react-native-swiper';
-import { withNavigation } from 'react-navigation';
 import Constants from 'expo-constants';
 
 class Product extends React.Component {
 
     render() {
-        const { navigate } = this.props.navigation;
-        const product = this.props.navigation.getParam('product');
+        const product = {};
         const { name, price, description, mainImageUrl } = product;
 
         return (
             <View style={{ flex: 1, marginTop: Constants.statusBarHeight }}>
-                <AppHeader />
                 <View style={{ flex: 1 }}>
                     <View style={{ flex: 1.5 }}>
                         <Swiper activeDotColor='white' dotStyle={{ backgroundColor: 'grey' }} style={styles.wrapper}>
@@ -43,7 +39,7 @@ class Product extends React.Component {
                             <Icon reverse raised color="white" iconStyle={styles.favIcon} name="heart" type="antdesign" />
                         </View>
                         <View style={{ flex: 2 }}>
-                            <Button onPress={() => navigate('Basket')} buttonStyle={styles.buyButton} containerStyle={styles.buyButtonContainer} title="ADD TO CART" />
+                            <Button onPress={() => console.log('Basket')} buttonStyle={styles.buyButton} containerStyle={styles.buyButtonContainer} title="ADD TO CART" />
                         </View>
                     </View>
                 </View>
@@ -98,4 +94,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default withNavigation(Product);
+export default Product;

@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, View, Text, FlatList, Dimensions, Image, TouchableOpacity } from 'react-native';
-import { withNavigation } from 'react-navigation';
 import { listProducts } from './graphql/queries';
 import { Storage, API, graphqlOperation } from 'aws-amplify';
 
@@ -73,12 +72,11 @@ class RecentUploads extends React.Component {
 
     renderUpload(product, i) {
         const { price, name, mainImageUrl } = product;
-        const { navigate } = this.props.navigation;
 
         return (
             <TouchableOpacity
                 style={styles.carouselItem}
-                onPress={() => navigate('Product', { product })}
+                onPress={() => console.log('Product', { product })}
             >
                 <Image
                     style={styles.carouselItemImage}
@@ -141,4 +139,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default withNavigation(RecentUploads);
+export default RecentUploads;

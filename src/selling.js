@@ -3,11 +3,9 @@ import API, { graphqlOperation } from '@aws-amplify/api';
 import { Storage, Auth } from 'aws-amplify';
 import { View, StyleSheet, TextInput, Image, KeyboardAvoidingView, Alert } from 'react-native';
 import { Button } from 'react-native-elements';
-import { withNavigation } from 'react-navigation';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
-import AppHeader from './appHeader';
 import { createProduct } from './graphql/mutations'
 const uuidv4 = require('uuid/v4');
 
@@ -52,7 +50,6 @@ class Selling extends React.Component {
 
     _uploadProduct = async () => {
         const { imageUri, price, title, description } = this.state;
-        const { navigate } = this.props.navigation;
 
         if (!imageUri) {
             Alert.alert('Please uplodate an image.');
@@ -132,7 +129,7 @@ class Selling extends React.Component {
                 console.log('Dynamo SUCCESS::', res)
                 Alert.alert(`Successfully uploaded ${title}.`)
                 this.setState(this.initialState)
-                navigate('Home');
+                console.log('Home');
             })
             .catch(err => {
                 console.log('Dynamo ERROR::', err)
@@ -150,7 +147,6 @@ class Selling extends React.Component {
 
         return (
             <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
-                <AppHeader />
                 <View style={styles.imageContainer}>
                     {button}
                 </View>
@@ -218,4 +214,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default withNavigation(Selling)
+export default Selling;

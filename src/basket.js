@@ -1,10 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet, View, FlatList, Image, TouchableOpacity } from 'react-native';
 import Constants from 'expo-constants';
-import BottomNavigationTabs from '../src/bottomNavigationTabs';
 import Icon from 'react-native-vector-icons/AntDesign';
-import { withNavigation } from 'react-navigation';
-import AppHeader from './appHeader';
 
 const PRODUCTS = [
     {
@@ -40,12 +37,10 @@ const PRODUCTS = [
 class Basket extends React.Component {
 
     renderProduct(product) {
-        const { navigate } = this.props.navigation;
-
         return (
             <TouchableOpacity
                 style={styles.productContainer}
-                onPress={() => navigate('Product', { product })}
+                onPress={() => console.log('Product', { product })}
             >
                 <View style={{ flex: 1 }}>
                     <Image source={product.image} style={styles.productImage} />
@@ -116,7 +111,6 @@ class Basket extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-                <AppHeader />
                 <View style={{ flex: 1 }}>
                     <View style={{ flex: 2 }}>
                         {this.renderBasketProducts()}
@@ -125,7 +119,6 @@ class Basket extends React.Component {
                         {this.renderBasketPrices()}
                     </View>
                 </View>
-                <BottomNavigationTabs />
             </View >
         );
     }
@@ -209,4 +202,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default withNavigation(Basket);
+export default Basket;

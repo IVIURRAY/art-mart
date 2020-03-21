@@ -2,8 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, View, FlatList, Image, Dimensions, TouchableOpacity } from 'react-native';
 import Constants from 'expo-constants';
 import { Icon } from 'react-native-elements'
-import AppHeader from './appHeader';
-import { withNavigation } from 'react-navigation';
 import { listProducts } from './graphql/queries';
 import { Storage, API, graphqlOperation } from 'aws-amplify';
 
@@ -93,12 +91,11 @@ class Products extends React.Component {
 
   renderProduct(product) {
     const { name, price, mainImageUrl } = product;
-    const { navigate } = this.props.navigation;
 
     return (
       <TouchableOpacity
         style={styles.item}
-        onPress={() => navigate('Product', { product })}
+        onPress={() => console.log('Product', { product })}
       >
         <View style={styles.productImageContainer}>
           <Image
@@ -120,7 +117,6 @@ class Products extends React.Component {
 
     return (
       <View style={styles.container}>
-        <AppHeader />
         <View style={{ flex: .5, flexDirection: 'row', paddingBottom: 20 }}>
           <View style={{ flex: 7 }}>
             <Text style={styles.pageTitle}>All products</Text>
@@ -211,4 +207,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default withNavigation(Products);
+export default Products;

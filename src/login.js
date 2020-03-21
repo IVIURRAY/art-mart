@@ -1,15 +1,12 @@
 import React from 'react';
 import { Text, StyleSheet, ImageBackground, View, Image } from 'react-native';
 import { Input, Button, SocialIcon } from 'react-native-elements';
-import { withNavigation } from 'react-navigation';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 
 class Login extends React.Component {
 
     render() {
-        const { navigate } = this.props.navigation;
-
         return (
             <ImageBackground
                 style={{ width: '100%', height: '100%' }}
@@ -17,7 +14,7 @@ class Login extends React.Component {
             >
                 <View style={{ flex: 1 }}>
                     <View style={{ flex: 2, alignItems: "center", justifyContent: "center" }} >
-                        <TouchableHighlight onPress={() => navigate('Home')}>
+                        <TouchableHighlight onPress={() => console.log('Home')}>
                             <Image source={require('../assets/logo.png')} style={{ width: 100, height: 100 }} />
                         </TouchableHighlight>
                     </View>
@@ -68,4 +65,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default withNavigation(Login);
+export default Login;
